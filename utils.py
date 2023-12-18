@@ -32,7 +32,7 @@ METRIC_MAP = {
     'trajectory': 'bio',
 }
 
-with open('feature_set.txt', 'r', encoding='utf8') as f_in:
+with open('/dgx1nas1/storage/data/sam/codes/2023_Arevalo_BatchCorrection/feature_set.txt', 'r', encoding='utf8') as f_in:
     FEATURE_SET = f_in.read().splitlines()
 
 

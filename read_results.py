@@ -30,8 +30,8 @@ def load_map_compound(locator: PathLocator, threshold=0.05):
     q_frac = ap['above_q_threshold'].value_counts(normalize=True)
     return {
         'mean_average_precision': ap['average_precision'].mean(),
-        'fraction_positive_p': p_frac[True],
-        'fraction_positive_q': q_frac[True]
+        'fraction_positive_p': p_frac.to_dict().get(True, 0),
+        'fraction_positive_q': q_frac.to_dict().get(True, 0)
     }
 
 

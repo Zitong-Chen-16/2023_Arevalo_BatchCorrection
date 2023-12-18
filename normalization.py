@@ -12,7 +12,6 @@ def apply_norm(normalizer: TransformerMixin, dframe: pd.DataFrame, field: str,
     '''Apply normalization considering dframe[field=='value'] as training set.
     Returns the dframe normalized
     '''
-
     feat_cols = find_feat_cols(dframe.columns)
     meta_cols = find_meta_cols(dframe.columns)
     meta = dframe[meta_cols]

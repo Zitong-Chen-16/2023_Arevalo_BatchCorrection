@@ -11,7 +11,7 @@ import scib
 from copairs.replicating import CorrelationTestResult, correlation_test
 
 import utils
-from preprocessing import filter_low_replicates
+from preprocessing import filter_low_replicates, filter_values_norm
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +23,20 @@ METRICS_SET = {
         'percent_repl'
     ],
     'FAST': [
-        'NMI_cluster/label', 'ARI_cluster/label', 'ASW_label',
-        'ASW_label/batch', 'PCR_batch', 'graph_conn', 'iLISI', 'cLISI',
-        'percent_repl'
+    'NMI_cluster/label', 'ARI_cluster/label', 'ASW_label',
+    'ASW_label/batch', 'PCR_batch', 'graph_conn', 'iLISI', 'cLISI'
     ],
+    # 'FAST': [
+    #     'NMI_cluster/label', 'ARI_cluster/label', 'ASW_label',
+    #     'ASW_label/batch', 'PCR_batch', 'graph_conn', 'iLISI', 'cLISI',
+    #     'percent_repl'
+    # ],
     'COLUMN_AS_BATCH': [
         'NMI_cluster/label', 'ARI_cluster/label', 'ASW_label',
         'ASW_label/batch', 'PCR_batch', 'isolated_label_silhouette',
         'graph_conn', 'iLISI', 'cLISI', 'percent_repl'
     ],
+    'SUPER_FAST': ['kBET', 'PCR_batch', 'ASW_label']
 }
 
 
@@ -141,6 +146,9 @@ def workflow(locator: utils.PathLocator, metrics: list[str]):
 
     # Use data from raw layer to compute PCR_batch.
     corrected_data.X = corrected_data.layers['raw']
+
+    # Filter out neg Con
+    corrected_data = filter_values_norm(corrected_data, locator).copy()
 
     # Compute metrics
     evaluate_sc(locator, corrected_data, corrected_data, metrics)

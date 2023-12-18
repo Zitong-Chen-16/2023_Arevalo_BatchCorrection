@@ -9,7 +9,14 @@ from utils import find_feat_cols
 
 
 logger = logging.getLogger(__name__)
-
+def clip_features(dframe, threshold):
+    '''Clip feature values to a given magnitude'''
+    feat_cols = find_feat_cols(dframe.columns)
+    counts = (dframe.loc[:, feat_cols].abs() > threshold).sum()[lambda x:x > 0]
+    if len(counts) > 0:
+        logger.info(f'Clipping {counts.sum()} values in {len(counts)} columns')
+        dframe.loc[:, feat_cols].clip(-threshold, threshold, inplace=True)
+    return dframe
 
 def drop_outlier_feats(dframe: pd.DataFrame, threshold: float):
     '''Remove columns with 1 percentile of absolute values larger than threshold'''

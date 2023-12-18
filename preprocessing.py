@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pycytominer.feature_select import feature_select
 
-from cleaning import drop_na_inf, drop_outlier_feats, drop_outlier_samples
+from cleaning import drop_na_inf, drop_outlier_feats, drop_outlier_samples, clip_features
 from loader import load_plates
 from normalization import sphere
 from utils import PathLocator, find_feat_cols, find_meta_cols, hashname
@@ -47,7 +47,7 @@ def filter_low_replicates(compound_data: ad.AnnData, min_replicates: int,
 def outlier_removal(dframe: pd.DataFrame):
     '''Remove outliers'''
     dframe, _ = drop_outlier_feats(dframe, threshold=1e2)
-    dframe = drop_outlier_samples(dframe, threshold=1e2)
+    dframe = clip_features(dframe, threshold=1e2)
     # dframe = isolation_removal(dframe)
     return dframe
 
@@ -59,7 +59,7 @@ def feature_selection(dframe: pd.DataFrame):
         "variance_threshold", "correlation_threshold", "drop_na_columns",
         "blocklist"
     ]
-    dframe = feature_select(dframe, operation=operations, image_features=True)
+    dframe = feature_select(dframe, operation=operations, image_features=False)
     logger.info(f'{dframe.shape} after feature select.')
     dframe = drop_na_inf(dframe, axis=1)
     return dframe

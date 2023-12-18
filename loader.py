@@ -79,16 +79,17 @@ def get_plate_metadata(sources: list[str],
         redlist = get_source_4_plate_redlist(plate_types)
         plate_metadata = plate_metadata[~plate_metadata['Metadata_Plate'].
                                         isin(redlist)]
-
+    # Filter only crispr metadata
+    plate_metadata = plate_metadata[plate_metadata['Metadata_Source']=='source_13']
     # Filter plates from source_3 batches without DMSO
-    plate_metadata = plate_metadata[
-        (~plate_metadata['Metadata_Batch'].isin(SOURCE3_BATCH_REDLIST))
-        | (plate_metadata['Metadata_PlateType'] == 'TARGET2')]
+    # plate_metadata = plate_metadata[
+    #     (~plate_metadata['Metadata_Batch'].isin(SOURCE3_BATCH_REDLIST))
+    #     | (plate_metadata['Metadata_PlateType'] == 'TARGET2')]
 
-    plate_metadata = plate_metadata[plate_metadata['Metadata_Source'].isin(
-        sources)]
-    plate_metadata = plate_metadata[plate_metadata['Metadata_PlateType'].isin(
-        plate_types)]
+    # plate_metadata = plate_metadata[plate_metadata['Metadata_Source'].isin(
+    #     sources)]
+    # plate_metadata = plate_metadata[plate_metadata['Metadata_PlateType'].isin(
+    #     plate_types)]
     return plate_metadata
 
 
@@ -104,15 +105,25 @@ def get_well_metadata(plate_types: list[str]):
     # Filter out wells
     well_metadata = well_metadata[~well_metadata['Metadata_JCP2022'].isin(
         ['UNTREATED', 'UNKNOWN', 'BAD CONSTRUCT'])]
-
+    
     return well_metadata
 
+ALL_PLATES = pd.read_parquet('/dgx1nas1/storage/data/sam/codes/2023_Arevalo_BatchCorrection/inputs/profiles/profiles_cc_adjusted.parquet')
+ALL_PLATES.drop(['Cells_AreaShape_FormFactor', 'Cytoplasm_AreaShape_FormFactor'], axis=1, inplace=True)
+from pathlib import Path
+def get_plate_from_cache(path: str) -> pd.DataFrame:
+    plate_id = Path(path).stem
+    cols = ['Metadata_Source', 'Metadata_Plate', 'Metadata_Well'] + FEATURE_SET
+    plate = ALL_PLATES.query('Metadata_Plate==@plate_id').copy()
+    plate = plate[[c for c in cols if c in plate.columns]]
+    return plate
 
 def load_plate(path: str, meta: pd.DataFrame, mad_norm: bool,
                epsilon_mad: float, column_norm: str,
                values_norm: list[str]) -> pd.DataFrame:
     '''Load a plate and optionally apply robustmad norm'''
-    profile = pd.read_parquet(path)
+    #profile = pd.read_parquet(path)
+    profile = get_plate_from_cache(path)
     for column in FEATURE_SET:
         profile[column] = profile[column].astype(np.float32)
     profile['Metadata_Plate'] = profile['Metadata_Plate'].astype(str)

@@ -94,8 +94,10 @@ def workflow(locator: PathLocator, vis: Literal['pca', 'umap', 'mde']):
         return
     # Load data
     full_data = load_data(locator)
+    
     # Remove dmso
-    compound_data = filter_values_norm(full_data, locator).copy()
+    # compound_data = filter_values_norm(full_data, locator).copy()
+    compound_data = full_data.copy()
     del full_data
     # Sort samples per batch_key. Required for scanorama
     batch_col = compound_data.obs[locator.config['batch_key']]
